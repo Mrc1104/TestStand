@@ -16,6 +16,9 @@
 #define MAX_EVENT_POOL   200
 #define MAX_EVENT_LENGTH 1024*40 /* size in bytes */
 
+/* Number of data words in the event */
+#define MAX_WORDS   2700
+
 /* Define TI Type */
 #define TI_SLAVE
 /* TS Fiber Link trigger source (from TI Master, TD, or TS), POLL for available data */
@@ -26,13 +29,14 @@
 /* Measured longest fiber length in systemt */
 #define FIBER_LATENCY_OFFSET 0x4A
 
-/* Define buffering level */
-#define BUFFERLEVEL 10
 
 /* Headers */
 #include "dmaBankTools.h"   /* Macros for handling CODA banks            */
 #include "tiprimary_list.c" /* Source required for CODA ROL using the TI */
 #include "sdLib.h"
+
+/* Define buffering level */
+#define BUFFERLEVEL 10
 
 /****************************************
  *  DOWNLOAD
@@ -50,6 +54,8 @@ void rocDownload()
 	 */
 	vmeDmaConfig(2,1,1);
 
+	/* Set Sync Delat Width to 0x40*32 = 2.048us */
+	tiSetSyncDelayWidth(0x54, 0x40, 1);
 
 	/* Define Block Level */
 	blockLevel = 1;
@@ -59,23 +65,26 @@ void rocDownload()
 	//tiEnableTriggerSource();
 	//tiSetSlavePort(5);
       	/* Enable HFBR#5 */
-      	tiEnableFiber(5);
+      // tiEnableFiber(5);
       	/* HFBR#5 Clock Source */
-      	tiSetClockSource(1);
+      	// tiSetClockSource(1);
       	/* HFBR#5 Sync Source */
-      	tiSetSyncSource(TI_SYNC_HFBR5);
+      	// tiSetSyncSource(TI_SYNC_HFBR5);
       	/* HFBR#5 Trigger Source */
-      	tiSetTriggerSource(TI_TRIGGER_HFBR5);
-	tiSetTriggerSourceMask(TI_TRIGGER_HFBR5 );
-	tiEnableTriggerSource();
-/*
-	stat = sdInit(0);	
-	if(stat == 0)
+      	// tiSetTriggerSource(TI_TRIGGER_HFBR5);
+	// tiSetTriggerSourceMask(TI_TRIGGER_HFBR5 );
+	// tiEnableTriggerSource();
+	/*****************
+	 *   TI SETUP
+	 *****************/
+
+	/* Init the SD library so we can get status info */
+	stat = sdInit(0);
+	if(stat==0)
 	{
 		sdSetActiveVmeSlots(0);
 		sdStatus(0);
 	}
-*/
 	tiStatus(0);
 	printf("TI Initilized\n");
 	printf("--------\n");
@@ -91,7 +100,7 @@ rocPrestart()
 	/* Set number of events per block */
 	// tiSetBlockLevel(blockLevel);
 	printf("rocPrestart: Block Level set to %d\n",blockLevel);
-	unsigned int fiber_port = 5;
+	unsigned int fiber_port = 1;
 	printf("rocPrestart: Added tiClient connected to fiber port %d\n",fiber_port);
 	// tiFakeTriggerBankOnError(1);
 	tiStatus(0);
@@ -139,7 +148,6 @@ rocGo()
 void
 rocEnd()
 {
-  	tiDisableRandomTrigger();
 	tiStatus(0);
 	printf("rocEnd: Ended after %d blocks\n",tiGetIntCount() );
 } /* end rocEnd */
@@ -178,18 +186,28 @@ rocTrigger(int evntno)
 	}
 
 	/* EXAMPLE: How to open a bank (name=5, type=ui4) and add data words by hand */
-	BANKOPEN(4,BT_UI4,blockLevel);
+	BANKOPEN(3,BT_UI4,blockLevel);
+	*dma_dabufp++ = 0xcccccccc;
 	*dma_dabufp++ = tiGetIntCount();
-	*dma_dabufp++ = 0x44;
-	*dma_dabufp++ = 0x0044;
-	*dma_dabufp++ = 0x000044;
-	int ii;
-	for (ii=1;ii<=50;ii++) {
-		*dma_dabufp++ = ii;
-	}
-	*dma_dabufp++ = 0xcebaf222;
 	BANKCLOSE;
 
+	BANKOPEN(4, BT_UI4, blockLevel);
+	int i;
+	for(i = 0; i < 32; i++){
+		*dma_dabufp = LSWAP(i);
+		dma_dabufp++;
+	}
+	BANKCLOSE;
+
+	BANKOPEN(5, BT_UI4, blockLevel);
+	int i;
+	int dummy = 0;
+	for(i = 0; i < 16; i++){
+		dummy = (1<<i);
+		*dma_dabufp = LSWAP(dummy);
+		dma_dabufp++;
+	}
+	BANKCLOSE;
 	/* Check for sync Event */
 	if(tiGetSyncEventFlag()) {
 		/* Set new block level if it has changed */

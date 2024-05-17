@@ -51,6 +51,8 @@ rocDownload()
    */
 
   vmeDmaConfig(2,5,1);
+  /* Set Sync Delat Width to 0x40*32 = 2.048us */
+  tiSetSyncDelayWidth(0x54, 0x40, 1);
 
   /* Define BLock Level variable to a default */
   blockLevel = 1;

@@ -79,6 +79,9 @@ rocDownload()
 
   tiSetTriggerHoldoff(1,10,0);
   tiSetTriggerHoldoff(2,10,0);
+  /* Set Sync Delat Width to 0x40*32 = 2.048us */
+  tiSetSyncDelayWidth(0x54, 0x40, 1);
+
 
   /* Set initial number of events per block */
   tiSetBlockLevel(blockLevel);
