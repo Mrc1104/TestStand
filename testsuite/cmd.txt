@@ -1,5 +1,0 @@
-# example commands to run to generate fake data
-
-test_build/qwmockdatagenerator -r 4 -e 1:2000 --config qwparity_simple.conf --detectors mock_detectors.map --data ~/data/mock_data
-
-test_build/qwparity -r 4 -e 1:2000 --config qwparity_simple.conf --detectors mock_detectors.map --data ~/data/mock_data --rootfiles ~/data/japan_data/
