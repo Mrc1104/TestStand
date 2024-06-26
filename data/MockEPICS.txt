@@ -1,0 +1,70 @@
+
+Hit return to continue, q to quit:
+<!-- ===================== Buffer 3 contains 2237 words (8948 bytes) ===================== -->
+
+   <!-- header words: 2236, 0x831000 -->
+   <event format="evio" count="3" content="bank" data_type="0x10" tag="131" padding="0" num="0" length="2236" ndata="2235">
+
+      <!-- header words: 2234, 0x300 -->
+      <bank content="string" data_type="0x3" tag="0" padding="0" num="0" length="2234" ndata="1">
+         <![CDATA[HALLA:p       10.000000
+MMSHLAE 10.000000
+HacL_D1_P0rb    10.000000
+HacL_CalcAngle  10.000000
+HacL_D1_NMR:SIG 10.000000
+HacL_lvdt1_raw.VAL      10.000000
+HacL_lvdt2_raw.VAL      10.000000
+HacL_lvdt3_raw.VAL      10.000000
+HacR_D1_P0rb    10.000000
+HacR_CalcAngle  10.000000
+HacR_D1_NMR:SIG 10.000000
+HacR_lvdt1_raw.VAL      10.000000
+HacR_lvdt2_raw.VAL      10.000000
+HacR_lvdt3_raw.VAL      10.000000
+Hac_VMIC1182ha19:Encoder        10.000000
+HacR_alignAGL   10.000000
+IBC3H00CRCUR4   10.000000
+IGL1I00OD16_16  MOCK
+IGL1I00DIOFLRD  10.000000
+APEXPOS 10.000000
+pcrex90BDSPOS.VAL       10.000000
+pcrex90_PullString.VAL  10.000000
+pcrex45BDSPOS.VAL       10.000000
+pcrex45_PullString.VAL  10.000000
+HALLA:dpp       10.000000
+INJ:p   10.000000
+ARC1:p  10.000000
+ARC2:p  10.000000
+ARC3:p  10.000000
+ARC4:p  10.000000
+ARC5:p  10.000000
+ARC6:p  10.000000
+MBSY1C  10.000000
+MBSY1C.BDL      10.000000
+MBSY1CM 10.000000
+MBSY1C.S        10.000000
+MCZDSNMRLOCK    10.000000
+MCZDSZD 10.000000
+MCZDSRDFMAI     10.000000
+IPM1C12.XPOS    10.000000
+hac_bcm_average 10.000000
+HacL_alignAGL   10.000000
+EHAR_A_IXPEAK   10.000000
+EHAR_A_IYPEAK   10.000000
+EHAR_B_IXPEAK   10.000000
+EHAR_B_IYPEAK   10.000000
+halla_MeV       10.000000
+hallc_MeV       10.000000
+MQ171LM 10.000000
+HacL_Q1_P0rb    10.000000
+HacL_Q1_LS450:FLD_DATA  10.000000
+HacL_Q2_HP3458A:IOUT    10.000000
+HacL_Q2_P0rb    10.000000
+HacL_Q2_LS450:FLD_DATA  10.000000
+HacL_VMIC1182:0_Ch17    MOCK
+HacL_D1_HP3458A:IOUT    10.000000
+HacL_Q3_HP3458A:IOUT    10.000000
+HacL_Q3_P0rb    10.000000
+HacL_Q3_LS450:FLD_DATA  10.000000
+HacL_VMIC1182:0_Ch26    MOCK
+HacL_D_LS450:FLD_DATA   10.000000
