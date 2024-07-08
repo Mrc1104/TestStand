@@ -1,0 +1,66 @@
+Hit return to continue, q to quit:
+<!-- ===================== Buffer 3 contains 355 words (1420 bytes) ===================== -->
+
+   <!-- header words: 354, 0xff701001 -->
+   <event format="evio" count="3" content="bank" data_type="0x10" tag="65392" padding="0" num="1" length="354" ndata="353">
+
+      <!-- header words: 14, 0xff212002 -->
+      <bank content="segment" data_type="0x20" tag="65313" padding="0" num="2" length="14" ndata="13">
+
+         <!-- header word: 0x10a0004 -->
+         <uint64 data_type="0xa" tag="1" padding="0" length="4" ndata="2">
+            0x0000000000000001  0x0000000012345678
+         </uint64>
+
+         <!-- header word: 0x1850001 -->
+         <uint16 data_type="0x5" tag="1" padding="2" length="1" ndata="1">
+            0x0001
+         </uint16>
+
+         <!-- header word: 0x2010002 -->
+         <uint32 data_type="0x1" tag="2" padding="0" length="2" ndata="2">
+            0x12345678  0x00000000
+         </uint32>
+
+         <!-- header word: 0x1010002 -->
+         <uint32 data_type="0x1" tag="1" padding="0" length="2" ndata="2">
+            0x12345678  0x00000000
+         </uint32>
+      </bank>
+
+      <!-- header words: 168, 0x21001 -->
+      <bank content="bank" data_type="0x10" tag="2" padding="0" num="1" length="168" ndata="167">
+
+         <!-- header words: 166, 0x10101 -->
+         <uint32 data_type="0x1" tag="1" padding="0" num="1" length="166" ndata="165">
+            0x73310000  0x00000000  0x00000001  0x00000002
+            0x00000003  0x00000004  0x00000005  0x00000006
+            0x00000007  0x00000008  0x00000009  0x0000000a
+            0x0000000b  0x0000000c  0x0000000d  0x0000000e
+            0x0000000f  0x00000000  0x00000001  0x00000002
+            0x00000003  0x00000004  0x00000005  0x00000006
+            0x00000007  0x00000008  0x00000009  0x0000000a
+            0x0000000b  0x0000000c  0x0000000d  0x0000000e
+            0x0000000f  
+         </uint32>
+      </bank>
+
+      <!-- header words: 168, 0x11001 -->
+      <bank content="bank" data_type="0x10" tag="1" padding="0" num="1" length="168" ndata="167">
+
+         <!-- header words: 166, 0x10101 -->
+         <uint32 data_type="0x1" tag="1" padding="0" num="1" length="166" ndata="165">
+            0x73310000  0x00000000  0x00000001  0x00000002
+            0x00000003  0x00000004  0x00000005  0x00000006
+            0x00000007  0x00000008  0x00000009  0x0000000a
+            0x0000000b  0x0000000c  0x0000000d  0x0000000e
+            0x0000000f  0x00000000  0x00000001  0x00000002
+            0x00000003  0x00000004  0x00000005  0x00000006
+            0x00000007  0x00000008  0x00000009  0x0000000a
+            0x0000000b  0x0000000c  0x0000000d  0x0000000e
+            0x0000000f
+				</uint32>
+      </bank>
+   </event>
+
+   <!-- end buffer 3 -->
