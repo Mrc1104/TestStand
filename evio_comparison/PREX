@@ -1,0 +1,21 @@
+Collection name='prexinj_beamline.5152-.map', class='TList', size=1
+ Collection name='prexinj_beamline_eventcuts.2353-.map', class='TList', size=1
+ Collection name='prexinj_beamline_geometry.map', class='TList', size=1
+ Collection name='prexinj_beamline_pedestal.5356-.map', class='TList', size=1
+ Collection name='prexinj_helicity.5254-.map', class='TList', size=1
+ Collection name='prexCH_beamline.5337-.map', class='TList', size=1
+ Collection name='prexCH_beamline_eventcuts.5376-5420.map', class='TList', size=1
+ Collection name='prexCH_beamline_geometry.map', class='TList', size=1
+ Collection name='prexCH_beamline_pedestal.5152-5565.map', class='TList', size=1
+ Collection name='prex_sam.5376-.map', class='TList', size=1
+ Collection name='prex_sam_eventcuts.map', class='TList', size=1
+ Collection name='prex_sam_pedestal.5356-5575.map', class='TList', size=1
+ Collection name='prex_maindet.5376-.map', class='TList', size=1
+ Collection name='prex_maindet_eventcuts.5140-5635.map', class='TList', size=1
+ Collection name='prex_maindet_pedestal.5356-5927.map', class='TList', size=1
+ Collection name='prex_sync_scaler.2760-.map', class='TList', size=1
+ Collection name='prexCH_scaler.3347-.map', class='TList', size=1
+ Collection name='prexinj_scaler.2760-.map', class='TList', size=1
+ Collection name='prex_beammod.5140-.map', class='TList', size=1
+ Collection name='prex_beammod_eventcuts.map', class='TList', size=1
+
