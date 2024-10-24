@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <jvme.h>
+#include "mdgg.h"
+
+#define mdgg_addr 0x100000
+
+int main(int argc, char **argv)
+{
+
+  /* Open the VME interface */
+  vmeSetQuietFlag(1);
+  vmeOpenDefaultWindows();
+
+  
+  /* initialization */
+  mdggInit(mdgg_addr, 0, 1);
+
+ 
+  /* globar register, auxillary register, and action register */
+  setGlobalRegister_SclrGa (16);
+ 
+  /* setGate and setDealy */
+  setGate(1,64);
+  setDelay(1,16);
+  setDelay(3,16);
+  setGate(3,125000000);
+
+  /* FGG modes */
+  setFGGConfiguration(1,3);
+  setFGGConfiguration(2,5);
+  setFGGConfiguration(8,3);
+
+  /* scaler modes */
+  setScalerConfiguration(3,1);
+  setScalerConfiguration(4,1);
+  setScalerConfiguration(1,1);
+  setScalerConfiguration(2,1);
+  /* FGG Input channels */
+  setFGGInputSelector(2,8);
+  setFGGInputSelector(1,0);
+
+  /* NIM output channels */
+  
+
+
+  /* FGG stop selectors, scaler input selectors, masks */
+  setScalerInputSelector(3,8);
+  setScalerInputSelector(4,9);
+  
+  /* print status */
+  mdggPrintStatus();
+
+
+  /* Close the VME interface */
+  vmeCloseDefaultWindows();
+  
+
+  return 0;
+
+}

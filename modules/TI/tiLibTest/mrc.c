@@ -1,0 +1,329 @@
+/*
+ * File:
+ *    tiLibTest.c
+ *
+ * Description:
+ *    Test Vme TI interrupts with GEFANUC Linux Driver
+ *    and TI library
+ *
+ *
+ */
+
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "jvme.h"
+#include "tiLib.h"
+/* #include "remexLib.h" */
+
+DMA_MEM_ID vmeIN,vmeOUT;
+extern DMANODE *the_event;
+extern unsigned int *dma_dabufp;
+
+extern int tiA32Base;
+extern int tiNeedAck;
+
+#define BLOCKLEVEL 10
+//#define DO_READOUT
+
+/* Interrupt Service routine */
+void
+mytiISR(int arg)
+{
+	volatile unsigned short reg;
+	int dCnt, len=0,idata;
+	DMANODE *outEvent;
+	int tibready=0, timeout=0;
+	int printout = 1;
+	int dataCheck=0;
+
+	unsigned int tiIntCount = tiGetIntCount();
+
+	GETEVENT(vmeIN,tiIntCount);
+
+	tibready = tiBReady();
+	if(tibready==ERROR)
+	{
+		printf("%s: ERROR: tiIntPoll returned ERROR.\n",__FUNCTION__);
+		return;
+	}
+	if(tibready==0 && timeout<100)
+	{
+		printf("NOT READY!\n");
+		tibready=tiBReady();
+		timeout++;
+	}
+
+	if(timeout>=100)
+	{
+		printf("TIMEOUT!\n");
+		return;
+	}
+	//*dma_dabufp++;
+	//tiGenerateTriggerBank(dma_dabufp);
+	dCnt = tiReadBlock(dma_dabufp,5*BLOCKLEVEL+3+4,1);
+	//dCnt = tiReadTriggerBlock(dma_dabufp);
+
+	if(dCnt<=0)
+	{
+		printf("No data or error.  dCnt = %d\n",dCnt);
+		dataCheck=ERROR;
+	}
+	else
+	{
+//		dataCheck = tiCheckTriggerBlock(dma_dabufp);
+		dma_dabufp += dCnt;
+	}
+
+	PUTEVENT(vmeOUT);
+
+	int length = (((int)(dma_dabufp) - (int)(&the_event->length))) - 4;
+	int size = the_event->part->size - sizeof(DMANODE);
+
+	if(length>size)
+	{
+		printf("rocLib: ERROR: Event length > Buffer size (%d > %d).  Event %d\n",
+				length,size,the_event->nevent);
+		dataCheck=ERROR;
+	}
+
+	if(!dmaPEmpty(vmeIN)) 
+	{
+		while(dmaPNodeCount(vmeOUT) > 0) 
+		{
+			outEvent = dmaPGetItem(vmeOUT);
+//			#define READOUT 
+			if(tiIntCount%printout==0)
+			{
+				printf("Received %d triggers...\n",
+						tiIntCount);
+
+				len = outEvent->length;
+
+				for(idata=0;idata<len;idata++)
+				{
+					if((idata%5)==0) printf("\n\t");
+					printf("  0x%08x ",(unsigned int)LSWAP(outEvent->data[idata]));
+				}
+				printf("\n\n");
+			}
+			// Check if event type is 0
+			int evType = ((LSWAP(outEvent->data[2]) & 0xFF000000) >> 24);
+			if((evType == 0) || (evType == 0x40) || (evType == 0x80))
+			{
+				printf("Event Type = 0!!!!\n");
+				len = outEvent->length;
+
+				for(idata=0;idata<len;idata++)
+				{
+					if((idata%5)==0) printf("\n\t");
+					printf("  0x%08x ",(unsigned int)LSWAP(outEvent->data[idata]));
+				}
+				printf("\n\n");
+//				dataCheck=ERROR;
+			}
+			dmaPFreeItem(outEvent);
+			tiResetBlockReadout(); 
+		}
+	}
+
+	if(tiIntCount%printout==0)
+	{
+		printf("intCount = %d\r",tiIntCount );
+		fflush(stdout);
+	}
+	/*     sleep(1); */
+
+	/*   static int bl = BLOCKLEVEL; */
+	if(tiGetSyncEventFlag())
+	{
+		printf("SYNC EVENT\n");
+
+		/* Check for data available */
+		int davail = tiBReady();
+		if(davail > 0)
+		{
+			printf("%s: ERROR: Data available (%d) after readout in SYNC event \n",
+					__func__, davail);
+			dataCheck = ERROR;
+
+			printf("A32 = 0x%08x\n",
+					tiGetAdr32());
+			printf("tiBReady() = %d  ... Call vmeDmaFlush\n",
+					tiBReady());
+			vmeDmaFlush(tiGetAdr32());
+			printf("tiBReady() = %d\n",
+					tiBReady());
+
+		}
+	}
+
+	if(dataCheck!=OK)
+	{
+		tiSetBlockLimit(1);
+		tiNeedAck = 1;
+	}
+	else
+		tiNeedAck = 0;
+
+}
+
+
+int
+main(int argc, char *argv[]) {
+
+	int stat;
+
+	printf("\nmrc testing grounds\n");
+	printf("----------------------------\n");
+
+	/* remexSetCmsgServer("dafarm28"); */
+	/* remexInit(NULL,1); */
+
+	printf("Size of DMANODE    = %d (0x%x)\n",sizeof(DMANODE),sizeof(DMANODE));
+	printf("Size of DMA_MEM_ID = %d (0x%x)\n",sizeof(DMA_MEM_ID),sizeof(DMA_MEM_ID));
+
+	vmeOpenDefaultWindows();
+
+	/* Setup Address and data modes for DMA transfers
+	 *
+	 *  vmeDmaConfig(addrType, dataType, sstMode);
+	 *
+	 *  addrType = 0 (A16)    1 (A24)    2 (A32)
+	 *  dataType = 0 (D16)    1 (D32)    2 (BLK32) 3 (MBLK) 4 (2eVME) 5 (2eSST)
+	 *  sstMode  = 0 (SST160) 1 (SST267) 2 (SST320)
+	 */
+	vmeDmaConfig(2,5,1);
+
+	/* INIT dmaPList */
+	dmaPFreeAll();
+	vmeIN  = dmaPCreate("vmeIN",1024,4,0);
+	vmeOUT = dmaPCreate("vmeOUT",0,0,0);
+
+	dmaPStatsAll();
+	dmaPReInitAll();
+
+	tiA32Base=0x09000000;
+	tiSetFiberLatencyOffset_preInit(0x20);
+	tiInit(0,TI_READOUT_EXT_POLL,TI_INIT_SKIP_FIRMWARE_CHECK);
+	tiCheckAddresses();
+
+	tiSetEvTypeScalers(1);
+
+
+
+	tiSetSyncEventInterval(0);
+	tiSetEventFormat(3);
+
+	char mySN[20];
+	printf("0x%08x\n",tiGetSerialNumber((char **)&mySN));
+	printf("mySN = %s\n",mySN);
+
+	/* user defined tiTrigger Table
+	 * TS# 1 & 6 generates Trigger 1 (Physics)
+	 * No Trigger 2 (Playback Trigger)
+	 * No SyncEvent
+	 */
+	unsigned int tiTable_coinc_test[16] = { /* Ts# 1 & 6 generate Trigger 1 (Physics) */
+		0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
+		0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c,
+		0x23226120, 0x27262524, 0x2b2a2928, 0x2f2e2d2c,
+		0x33323130, 0x37363534, 0x3b3a3938, 0x3f3e3d3c,
+	};
+	unsigned int tiTable_zeroes[16] = {
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+ 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+ 		0x00000000, 0x00000000, 0x00000000, 0x00000000,
+	};
+	
+	tiTriggerTableConfig(tiTable_coinc_test);	
+//	tiLoadTriggerTable(3);
+	tiSetTriggerHoldoff(4,4,0);
+
+	tiSetPrescale(1000);
+	tiSetInputPrescale(1,1);
+	tiSetInputPrescale(6,2);
+	tiSetBlockLevel(BLOCKLEVEL);
+
+	/* set the window of the input trigger coincidence window */
+	/* para: window_width (units of 4ns)			  */
+	tiSetTriggerWindow(1);
+	/* tiSetTriggerLatchOnLevel(1); */
+
+	stat = tiIntConnect(TI_INT_VEC, mytiISR, 0);
+	if (stat != OK)
+	{
+		printf("ERROR: tiIntConnect failed \n");
+		goto CLOSE;
+	}
+	else
+	{
+		printf("INFO: Attached TI Interrupt\n");
+	}
+
+	tiSetTriggerSource(TI_TRIGGER_TSINPUTS);
+	tiDisableTSInput(0x3f);
+	tiEnableTSInput(0x21); // TS 1,6
+
+
+	/*     tiSetFPInput(0x0); */
+	/*     tiSetGenInput(0xffff); */
+	/*     tiSetGTPInput(0x0); */
+
+	tiSetFPInputReadout(1);
+
+	tiSetBusySource(TI_BUSY_LOOPBACK,1);
+	tiSetBlockBufferLevel(1);
+
+	/*   tiSetFiberDelay(1,2); */
+	/*   tiSetSyncDelayWidth(1,0x3f,1); */
+
+	tiSetBlockLimit(9);
+	tiSetScalerMode(1, 1);
+
+	tiPrintTriggerTable(1);
+	printf("Hit enter to reset stuff\n");
+	getchar();
+
+	tiClockReset();
+	taskDelay(1);
+	tiTrigLinkReset();
+	taskDelay(1);
+	tiEnableVXSSignals();
+
+	tiSyncReset(1);
+
+	taskDelay(1);
+	tiStatus(1);
+
+	printf("Hit enter to start triggers\n");
+	getchar();
+
+	tiIntEnable(0);
+	tiStatus(1);
+
+	printf("Hit any key to Disable TID and exit.\n");
+	getchar();
+
+	tiIntDisable();
+
+	tiIntDisconnect();
+
+	tiStatus(1);
+	tiPrintEvTypeScalers();
+
+CLOSE:
+
+	dmaPFreeAll();
+	vmeCloseDefaultWindows();
+
+	exit(0);
+}
+
+/*
+   Local Variables:
+   compile-command: "make -k -B tiLibTest"
+End:
+*/

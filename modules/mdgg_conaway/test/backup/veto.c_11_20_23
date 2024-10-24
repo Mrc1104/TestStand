@@ -1,0 +1,84 @@
+/********************************************
+ * veto.c
+ * Brief - Simple gate generation used for 
+ * 	   sis3820 testing.
+ * 	   Gates:
+ * 	   	1) Scaler Input - 91 Hz
+ * 	   	2) Veto Signal  - 2 HZ
+ * 	   	3) LNE source   - 1 Hz
+********************************************/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <jvme.h>
+#include "mdgg.h"
+
+#define mdgg_addr 0x100000
+int main(int argc, char **argv)
+{
+
+	/* Open the VME interface */
+	vmeSetQuietFlag(1);
+	vmeOpenDefaultWindows();
+
+
+	/* initialization */
+	mdggInit(mdgg_addr, 0, 1);
+	setDefaults();
+
+	/* global register, auxillary register, and action register */
+	setActionRegister_ResFGG(0xff);  
+
+	setGlobalRegister_SclrGa(12);
+	
+	
+	int one_sec = 125000000;
+
+	int lne = one_sec / 2;
+	int lne_delay = one_sec / 2;
+	int veto = one_sec / 8;
+	int veto_delay = lne_delay;
+
+
+	/* setGate and setDelay */
+	setGate(1,one_sec/1000);
+	setDelay(1,one_sec/100);
+	
+	/* setGate and setDelay */
+	setGate(2,veto);
+	setDelay(2,veto_delay);
+	
+	/* setGate and setDelay */
+	setGate(3,lne);
+	setDelay(3,lne_delay);
+
+	/* FGG and scaler configuration */
+	setFGGConfiguration(1, 3);
+	setFGGConfiguration(2, 3);
+	setFGGConfiguration(3, 3);
+
+	
+	/* FGG Input channels */
+	setFGGInputSelector(3,0);
+	
+
+	/* NIM output channels */
+
+
+	/* FGG stop selectors, scaler input selectors, masks */
+
+	/* print status */
+	sleep(5);
+	mdggPrintStatus(1);
+	mdggPrintStatus(2);
+	mdggPrintStatus(3);
+
+
+	/* Close the VME interface */
+	vmeCloseDefaultWindows();
+
+
+	return 0;
+
+}

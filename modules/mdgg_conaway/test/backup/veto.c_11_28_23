@@ -1,0 +1,77 @@
+/********************************************
+ * veto.c
+ * Brief - Simple gate generation used for 
+ * 	   sis3820 testing.
+ * 	   Gates:
+ * 	   	1) Scaler Input - 8.33 MHz
+ * 	   	2) Veto Signal  - 0.11 MHZ
+ * 	   	3) LNE source   - 1.00  Hz
+********************************************/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <jvme.h>
+#include "mdgg.h"
+
+#define mdgg_addr 0x100000
+int main(int argc, char **argv)
+{
+
+	/* Open the VME interface */
+	vmeSetQuietFlag(1);
+	vmeOpenDefaultWindows();
+
+
+	/* initialization */
+	mdggInit(mdgg_addr, 0, 1);
+	setDefaults();
+
+	/* global register, auxillary register, and action register */
+	setActionRegister_ResFGG(0xff);  
+
+	setGlobalRegister_SclrGa(12);
+	
+
+	/* setGate and setDelay */
+	setGate(1,5);
+	setDelay(1,10);
+	
+	/* setGate and setDelay */
+	setGate(2,1000);
+	//setGate(2,100);
+	setDelay(2,10);
+	
+	/* setGate and setDelay */
+	setGate(3,100);
+	setDelay(3,125000000);
+
+	/* FGG and scaler configuration */
+	setFGGConfiguration(1, 3);
+	setFGGConfiguration(2, 3);
+	setFGGConfiguration(3, 3);
+
+	
+	/* FGG Input channels */
+	setFGGInputSelector(3,0);
+	
+
+	/* NIM output channels */
+
+
+	/* FGG stop selectors, scaler input selectors, masks */
+
+	/* print status */
+	sleep(5);
+	mdggPrintStatus(1);
+	mdggPrintStatus(2);
+	mdggPrintStatus(3);
+
+
+	/* Close the VME interface */
+	vmeCloseDefaultWindows();
+
+
+	return 0;
+
+}

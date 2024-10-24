@@ -1,0 +1,32 @@
+# test makefile for mdgg-8
+
+ifndef LINUXVME_LIB
+        LINUXVME_LIB    = ${CODA}/extensions/linuxvme/libs
+endif
+
+ifndef LINUXVME_INC
+        LINUXVME_INC    = ${CODA}/extensions/linuxvme/include
+endif
+
+CROSS_COMPILE           =
+CC                      = gcc
+AR                      = ar
+RANLIB                  = ranlib
+CFLAGS                  = -Wall -O2 -DLINUX -DJLAB -DDAYTIME=\""`date`"\"
+LDFLAGS                 = -L$(LINUXVME_LIB) -L. -L..
+LIBS                    = -lrt -ljvme -ltir -lMDGG
+INCS                    = -I$(LINUXVME_INC) -I. -I.. -I/usr/include  -I${CODA}/common/include
+PROGS                   = 
+SRC                     = 
+OBJ                     = $(SRC:.c=.o)
+
+all: mdgg_test
+
+clean distclean:
+	@rm -f $(PROGS) *~ mdgg_test
+
+
+.PHONY: all clean distclean
+
+mdgg_test: mdgg_test.c
+	$(CC) -fpic $(CFLAGS) $(INCS) $(LDFLAGS) $(LIBS) -o $@ $^
